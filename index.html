@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lo que aprendí del video: Supabase y su API REST</title>
+<meta name="description" content="Trabajo práctico: análisis del video de Supabase (API REST y seguridad a nivel de fila).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="toni.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#inicio">Lo que aprendí</a>
+    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="menu">Menú</button>
+    <nav id="menu" aria-label="Secciones de la página">
+      <ul>
+        <li><a href="#introduccion">Introducción</a></li>
+        <li><a href="#conceptos">Conceptos</a></li>
+        <li><a href="#cuestionario">Cuestionario</a></li>
+        <li><a href="#aplicacion">Aplicación práctica</a></li>
+        <li><a href="#recursos">Recursos visuales</a></li>
+        <li><a href="#conclusion">Conclusión</a></li>
+        <li><a href="#fuentes">Fuentes</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<header class="hero" id="inicio">
+  <div class="wrap hero-grid">
+    <div>
+      <h1>Lo que aprendí del video</h1>
+      <p>Supabase: cómo crear una base de datos con API REST lista para usar y cómo protegerla.</p>
+      <div class="student">
+        <dl>
+          <dt>Estudiante:</dt><dd>Tobias Duarte</dd>
+          <dt>Curso:</dt><dd>2do 6ta – Bachillerato Técnico en Informática</dd>
+          <dt>Asignatura:</dt><dd>Software / Desarrollo Web</dd>
+          <dt>Institución:</dt><dd>Colegio Nacional EMD Asunción Escalada</dd>
+        </dl>
+      </div>
+    </div>
+    <figure>
+      <!-- Diagrama del flujo: cliente -> API REST -> política RLS -> tabla -->
+      <svg viewBox="0 0 520 250" role="img" aria-labelledby="t1 d1">
+        <title id="t1">Cómo viaja una petición en Supabase</title>
+        <desc id="d1">Un cliente envía una petición a la API REST, la política de seguridad RLS decide si pasa, y la tabla products de PostgreSQL devuelve los datos.</desc>
+        <rect x="10" y="85" width="105" height="80" rx="10" fill="#fff" stroke="#0f3050" stroke-width="2"/>
+        <text x="62" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#0f3050">Cliente</text>
+        <text x="62" y="142" text-anchor="middle" font-size="12" fill="#4d6073">Postman / web</text>
+
+        <rect x="150" y="85" width="105" height="80" rx="10" fill="#fff" stroke="#0f3050" stroke-width="2"/>
+        <text x="202" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#0f3050">API REST</text>
+        <text x="202" y="142" text-anchor="middle" font-size="12" fill="#4d6073">PostgREST</text>
+
+        <rect x="290" y="70" width="95" height="110" rx="10" fill="#fff4ea" stroke="#a4501b" stroke-width="2"/>
+        <text x="337" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#a4501b">RLS</text>
+        <text x="337" y="138" text-anchor="middle" font-size="12" fill="#a4501b">¿tiene permiso?</text>
+
+        <rect x="420" y="85" width="95" height="80" rx="10" fill="#0d7a78"/>
+        <text x="467" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">products</text>
+        <text x="467" y="142" text-anchor="middle" font-size="12" fill="#e5f5f3">PostgreSQL</text>
+
+        <g stroke="#0f3050" stroke-width="2" fill="none">
+          <path d="M115 125 H147"/><path d="M255 125 H287"/><path d="M385 125 H417"/>
+        </g>
+        <g fill="#0f3050">
+          <polygon points="147,120 147,130 155,125"/><polygon points="287,120 287,130 295,125"/><polygon points="417,120 417,130 425,125"/>
+        </g>
+        <text x="260" y="40" text-anchor="middle" font-size="14" fill="#14263a">Cada petición pasa por las reglas antes de tocar los datos</text>
+        <text x="260" y="215" text-anchor="middle" font-size="13" fill="#4d6073">GET · POST · PATCH · DELETE</text>
+      </svg>
+      <figcaption>Recorrido de una petición en Supabase (diagrama propio).</figcaption>
+    </figure>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="introduccion">
+    <h2>Introducción</h2>
+    <p>El video es un tutorial práctico de <strong>Supabase</strong>, una plataforma open source que se presenta como alternativa a Firebase. Muestra cómo crear un proyecto, armar una tabla llamada <code>products</code> y usar la API REST que se genera sola para leer, agregar, modificar y borrar datos.</p>
+    <p>En la segunda parte explica la seguridad: cómo activar <strong>Row Level Security (RLS)</strong> y crear políticas para decidir quién puede hacer cada operación. También prueba la API con Postman y observa el contenido de un token JWT.</p>
+  </section>
+
+  <section id="conceptos">
+    <h2>Conceptos fundamentales</h2>
+    <div class="concepts">
+      <div class="concept"><h3>Supabase</h3><p>Plataforma de backend que ofrece base de datos, autenticación y API sin tener que programar un servidor propio.</p></div>
+      <div class="concept"><h3>PostgreSQL</h3><p>Base de datos relacional donde se guardan las tablas. Es el motor que Supabase usa por debajo.</p></div>
+      <div class="concept"><h3>PostgREST</h3><p>Herramienta que lee las tablas y crea automáticamente los puntos de acceso de la API REST.</p></div>
+      <div class="concept"><h3>API REST</h3><p>Forma de trabajar con datos mediante peticiones HTTP: GET (leer), POST (crear), PATCH (modificar) y DELETE (borrar).</p></div>
+      <div class="concept"><h3>Row Level Security</h3><p>Reglas que definen qué filas puede ver o cambiar cada usuario. Sin ellas, la tabla queda desprotegida.</p></div>
+    </div>
+  </section>
+
+  <section id="cuestionario">
+    <h2>Cuestionario resuelto</h2>
+    <div class="qa">
+
+      <article>
+        <h3>1. ¿Cuál es el tema principal del video? Explica de qué trata.</h3>
+        <p>Trata sobre cómo usar Supabase, una alternativa open source a Firebase. Muestra cómo crear un proyecto con base de datos Postgres y usar su API REST automática para leer y modificar datos.</p>
+      </article>
+
+      <article>
+        <h3>2. ¿Qué problema o necesidad tecnológica se aborda?</h3>
+        <p>Montar un backend (base de datos, API, usuarios) lleva mucho tiempo. Supabase lo da armado, y además enseña a proteger los datos para que no cualquiera pueda modificarlos.</p>
+      </article>
+
+      <article>
+        <h3>3. ¿Cuáles son los cinco conceptos más importantes? Define cada uno.</h3>
+        <ul>
+          <li><strong>Supabase:</strong> plataforma de backend con base de datos, autenticación y API.</li>
+          <li><strong>PostgreSQL:</strong> la base de datos relacional que usa por debajo.</li>
+          <li><strong>PostgREST:</strong> herramienta que crea la API REST automáticamente desde las tablas.</li>
+          <li><strong>API REST:</strong> forma de operar datos mediante peticiones HTTP (GET, POST, PATCH, DELETE).</li>
+          <li><strong>Row Level Security (RLS):</strong> reglas que definen quién puede leer o modificar cada fila.</li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>4. ¿Qué herramientas, programas o tecnologías se mencionan y para qué sirven?</h3>
+        <ul>
+          <li><strong>Supabase:</strong> backend (base de datos, API y usuarios).</li>
+          <li><strong>Table Editor y API Docs:</strong> crear tablas y ver ejemplos de cada petición.</li>
+          <li><strong>Postman:</strong> probar la API enviando peticiones.</li>
+          <li><strong>jwt.io:</strong> ver qué contiene un token JWT.</li>
+          <li><strong>Navegador web:</strong> manejar el panel de Supabase.</li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>5. ¿Qué procedimientos o pasos se explican? Preséntalos en orden.</h3>
+        <ol>
+          <li>Crear la cuenta, la organización y el proyecto.</li>
+          <li>Ver las claves y la URL de la API.</li>
+          <li>Crear la tabla <code>products</code> con sus columnas.</li>
+          <li>Cargar filas de prueba.</li>
+          <li>Probar la API desde Postman.</li>
+          <li>Activar RLS y crear políticas.</li>
+          <li>Probar insertar, actualizar y borrar con y sin permiso.</li>
+        </ol>
+      </article>
+
+      <article>
+        <h3>6. ¿Qué ejemplos prácticos aparecen? Explica uno detalladamente.</h3>
+        <p>Se hace una petición GET desde Postman a la URL de la tabla <code>products</code>, enviando la clave <code>apikey</code> en los encabezados. La API devuelve las filas en formato JSON (por ejemplo laptop, monitor, mouse gaming y teclado). Con la política de lectura activa se pueden ver los datos; sin ella, la tabla aparece vacía.</p>
+      </article>
+
+      <article>
+        <h3>7. ¿Qué conocimientos previos son necesarios para comprender lo explicado?</h3>
+        <p>Qué es una base de datos y una tabla, nociones de HTTP y JSON, y qué es una API. Ayuda saber algo de SQL.</p>
+      </article>
+
+      <article>
+        <h3>8. ¿Qué ventajas o beneficios ofrece la tecnología o procedimiento?</h3>
+        <ul>
+          <li>Crea una API sin programarla.</li>
+          <li>Tiene plan gratuito para empezar.</li>
+          <li>Incluye seguridad integrada (RLS y autenticación).</li>
+          <li>Permite prototipar rápido.</li>
+          <li>Es open source.</li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>9. ¿Qué dificultades, errores o precauciones deben considerarse?</h3>
+        <ul>
+          <li>Si se activa RLS sin políticas, no se devuelve ningún dato.</li>
+          <li>No exponer claves secretas (usar solo la clave pública en el cliente).</li>
+          <li>Escribir bien las políticas para no dar permisos de más.</li>
+          <li>Cuidar los tokens JWT y su expiración.</li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>10. ¿Cómo aplicarías lo aprendido en un proyecto informático real?</h3>
+        <p>En una app con usuarios, por ejemplo un sistema de inventario o una tienda. La tabla guardaría los productos, la API se los entregaría al sitio web y RLS haría que solo los usuarios autorizados puedan editarlos.</p>
+      </article>
+
+      <article>
+        <h3>11. ¿Qué parte del video consideras más importante y por qué?</h3>
+        <p>La de Row Level Security, porque sin ella cualquiera con la clave pública podría leer o borrar todos los datos. Es lo que vuelve segura a la aplicación.</p>
+      </article>
+
+      <article>
+        <h3>12. ¿Qué conocimientos nuevos adquiriste y cómo los explicarías a otra persona?</h3>
+        <p>Aprendí que con Supabase se crea una base de datos y una API lista en minutos, y que hay que controlar el acceso con políticas. Se lo explicaría así: "Es como una planilla en la nube que tiene su propia puerta de acceso. Vos decidís quién puede mirar y quién puede cambiar cada fila."</p>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="aplicacion">
+    <h2>Aplicación práctica</h2>
+    <p>Un procedimiento que aprendí es <strong>leer los productos de la tabla desde la API</strong> y protegerla con una política. Así se haría:</p>
+    <ol class="steps">
+      <li>Crear la tabla <code>products</code> con las columnas <code>id</code>, <code>created_at</code> y <code>name</code>.</li>
+      <li>Activar RLS en la tabla.</li>
+      <li>Crear una política de lectura (SELECT) para que todos puedan ver los productos.</li>
+      <li>Enviar una petición GET con las cabeceras <code>apikey</code> y <code>Authorization</code>.</li>
+    </ol>
+    <p>Ejemplo de la petición (con datos de muestra):</p>
+<pre><code>GET https://TU-PROYECTO.supabase.co/rest/v1/products?select=*
+apikey: TU_CLAVE_PUBLICA
+Authorization: Bearer TU_CLAVE_PUBLICA</code></pre>
+    <p>Qué operación corresponde a cada método HTTP:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Método</th><th>Acción</th><th>Equivale a</th></tr></thead>
+        <tbody>
+          <tr><td>GET</td><td>Leer filas</td><td>SELECT</td></tr>
+          <tr><td>POST</td><td>Agregar una fila</td><td>INSERT</td></tr>
+          <tr><td>PATCH</td><td>Modificar filas</td><td>UPDATE</td></tr>
+          <tr><td>DELETE</td><td>Borrar filas</td><td>DELETE</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout"><strong>Precaución:</strong> en un proyecto real, la clave de servicio (service role) nunca debe ir en el código del navegador.</div>
+  </section>
+
+  <section id="recursos">
+    <h2>Recursos visuales</h2>
+    <figure class="figure-card">
+      <svg viewBox="0 0 560 210" role="img" aria-labelledby="t2 d2">
+        <title id="t2">Qué pasa con y sin política RLS</title>
+        <desc id="d2">Sin política, la tabla con RLS activa devuelve una lista vacía. Con una política de lectura, devuelve las filas.</desc>
+        <rect x="10" y="20" width="250" height="150" rx="10" fill="#fff" stroke="#a4501b" stroke-width="2"/>
+        <text x="135" y="50" text-anchor="middle" font-size="15" font-weight="700" fill="#a4501b">RLS activo, sin política</text>
+        <text x="135" y="85" text-anchor="middle" font-size="13" fill="#14263a">GET /products</text>
+        <rect x="55" y="105" width="160" height="40" rx="6" fill="#fff4ea" stroke="#a4501b"/>
+        <text x="135" y="130" text-anchor="middle" font-size="14" fill="#a4501b">[ ]  (lista vacía)</text>
+
+        <rect x="300" y="20" width="250" height="150" rx="10" fill="#fff" stroke="#0d7a78" stroke-width="2"/>
+        <text x="425" y="50" text-anchor="middle" font-size="15" font-weight="700" fill="#0d7a78">RLS activo, con política</text>
+        <text x="425" y="85" text-anchor="middle" font-size="13" fill="#14263a">GET /products</text>
+        <rect x="345" y="105" width="160" height="40" rx="6" fill="#dcefeb" stroke="#0d7a78"/>
+        <text x="425" y="130" text-anchor="middle" font-size="14" fill="#0f3050">laptop, monitor, …</text>
+        <text x="280" y="196" text-anchor="middle" font-size="12" fill="#4d6073">Diagrama propio basado en lo mostrado en el video</text>
+      </svg>
+      <figcaption>Comparación de resultados con y sin política de lectura.</figcaption>
+    </figure>
+  </section>
+
+  <section id="conclusion">
+    <h2>Conclusión personal</h2>
+    <p>Este video me mostró que hoy se puede tener una base de datos con su API funcionando en pocos minutos, sin armar un servidor desde cero. Me pareció muy útil porque en un proyecto de informática ahorra mucho tiempo y permite concentrarse en la parte visual y en la lógica del sistema.</p>
+    <p>Lo más importante que me llevo es que la facilidad no reemplaza a la seguridad: hay que activar RLS y escribir bien las políticas. Pienso usar Supabase en proyectos propios, por ejemplo para guardar y consultar datos de un sistema de gestión.</p>
+  </section>
+
+  <section id="fuentes">
+    <h2>Fuentes</h2>
+    <ul>
+      <li>Video analizado: <a href="https://youtu.be/pi33WDrgfpI?si=7fcjzILq4wVnEvie" target="_blank" rel="noopener">Supabase: Tutorial Práctico y Overview (REST API)</a>.</li>
+      <li>Documentación oficial de Supabase: <a href="https://supabase.com/docs" target="_blank" rel="noopener">supabase.com/docs</a>.</li>
+      <li>Documentación de PostgREST: <a href="https://postgrest.org" target="_blank" rel="noopener">postgrest.org</a>.</li>
+      <li>Herramienta para ver tokens JWT: <a href="https://jwt.io" target="_blank" rel="noopener">jwt.io</a>.</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Trabajo práctico individual – Software / Desarrollo Web – 2.º BTI</p>
+    <p>Colegio Nacional EMD Asunción Escalada · Estudiante: Tobias Duarte</p>
+    <p><a href="#inicio">Volver arriba</a></p>
+  </div>
+</footer>
+
+<script>
+  var btn = document.getElementById('menuBtn');
+  var menu = document.getElementById('menu');
+  btn.addEventListener('click', function () {
+    var open = menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+  });
+  menu.addEventListener('click', function (e) {
+    if (e.target.tagName === 'A') {
+      menu.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>
+</body>
+</html>
